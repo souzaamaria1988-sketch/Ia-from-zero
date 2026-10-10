@@ -1,0 +1,11 @@
+# artefatos de treino (regeneráveis)
+checkpoints/
+out/
+data/train.bin
+data/val.bin
+data/*.tar.gz
+__pycache__/
+*.pyc
+
+# modelos brutos grandes demais; os GGUF finais ficam commitados em models/
+models/*.bin

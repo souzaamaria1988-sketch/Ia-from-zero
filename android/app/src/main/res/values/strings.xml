@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GPT-Machado</string>
+    <string name="hint">Escreva o início de uma frase…</string>
+    <string name="go">Continuar</string>
+</resources>
