@@ -70,6 +70,8 @@ def main():
     ap.add_argument("--eval-interval", type=int, default=200)
     ap.add_argument("--eval-iters", type=int, default=20)
     ap.add_argument("--seed", type=int, default=1337)
+    ap.add_argument("--init-from", type=Path, default=None,
+                    help="checkpoint .pt para continuar o treino (pesos)")
     ap.add_argument("--timeout-min", type=float, default=0.0, help="0 = sem limite")
     ap.add_argument("--gen-tokens", type=int, default=400)
     args = ap.parse_args()
@@ -92,6 +94,10 @@ def main():
         n_head=args.n_head, n_embd=args.n_embd, dropout=args.dropout,
     )
     model = GPT(cfg)
+    if args.init_from:
+        ck0 = torch.load(args.init_from, map_location="cpu", weights_only=False)
+        model.load_state_dict(ck0["model"])
+        print(f"[treino] pesos iniciais de {args.init_from} (val {ck0.get('val_loss', -1):.4f}, iter {ck0.get('iter', '?')})")
     nparams = sum(p.numel() for p in model.parameters())
     print(f"[modelo] {nparams:,} parâmetros | {args.n_layer} camadas | d={args.n_embd} | ctx={args.block_size} | vocab={vocab_size}")
 
