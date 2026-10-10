@@ -1,5 +1,7 @@
 # 🇧🇷 IA do Zero — GPT treinado de verdade, do dataset ao GGUF no celular
 
+![GPT-Machado](docs/banner.png)
+
 > **Desafio:** "treinar uma IA do zero com 1 trilhão de parâmetros, exportar para
 > GGUF, otimizada para celular, o menor e mais inteligente possível, usando o GitHub."
 >
