@@ -67,6 +67,39 @@ bash scripts/test_gguf.sh models/gpt-machado-q8_0.gguf
 No GitHub Actions: aba **Actions → "Treinar IA do zero" → Run workflow**
 (treina do zero num runner gratuito e publica o GGUF como artefato).
 
+## Demo ao vivo no navegador 🖥️
+
+O llama.cpp inclui um servidor web com interface pronta. Com o modelo de
+1,58 MB, qualquer máquina vira um servidor de IA:
+
+```bash
+/tmp/llama.cpp/build/bin/llama-server -m models/gpt-machado-q8_0.gguf \
+    --host 0.0.0.0 --port 8080 -c 512
+# abra http://localhost:8080 e escreva o início de uma frase
+```
+
+Também expõe uma API HTTP compatível:
+
+```bash
+curl http://localhost:8080/completion -H 'Content-Type: application/json' \
+  -d '{"prompt":"— Capitu, você me","n_predict":80,"temperature":0.85,"top_k":60}'
+```
+
+E há um REPL só com PyTorch (nem precisa do llama.cpp):
+
+```bash
+python3 scripts/demo_interativo.py
+```
+
+## Baixar o modelo para o celular 📱
+
+Após o merge do PR, o GGUF fica disponível direto no repositório
+(48 KB de download por rede móvel não existe mais lento que segure isso):
+
+```
+https://github.com/souzaamaria1988-sketch/Ia-from-zero/raw/main/models/gpt-machado-q8_0.gguf
+```
+
 ## Como rodar no celular 📱
 
 O GGUF é o formato nativo do llama.cpp em qualquer plataforma:

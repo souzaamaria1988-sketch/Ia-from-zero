@@ -3,3 +3,4 @@ numpy
 gguf
 tokenizers
 safetensors
+transformers
