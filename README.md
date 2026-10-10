@@ -38,6 +38,15 @@
 Compare: os GGUF de 7B/13B/70B que você baixa do HuggingFace têm 4/8/40 **gigabytes**.
 Este modelo é **milhares de vezes menor** — e foi treinado **aqui, do zero, em 2 CPUs**.
 
+## Os arquivos GGUF (já treinados, prontos para o celular)
+
+| Arquivo | Formato | Tamanho | Uso |
+|---|---|---|---|
+| `models/gpt-machado-q8_0.gguf` | Q8_0 | **1,58 MB** | ⭐ recomendado — perda quase nula |
+| `models/gpt-machado-q4_k_m.gguf` | Q4_K_M | **1,13 MB** | equilíbrio tamanho/qualidade |
+| `models/gpt-machado-q4_0.gguf` | Q4_0 | **0,96 MB** | o menor ainda utilizável |
+| `models/gpt-machado-f16.gguf` | F16 | 2,81 MB | referência (sem quantização) |
+
 ## Como rodar (treinar tudo de novo)
 
 ```bash
