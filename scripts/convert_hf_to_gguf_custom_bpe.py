@@ -34,12 +34,12 @@ from conversion.base import TextModel  # noqa: E402
 
 
 def _pre_custom(self, tokenizer) -> str:
-    # Nosso BPE usa ByteLevel (mesmo esquema do GPT-2) -> pre "gpt2"
-    return "gpt2"
+    # Nosso BPE usa ByteLevel (mesmo esquema do GPT-2) -> pre "gpt-2"
+    return "gpt-2"
 
 
 TextModel.get_vocab_base_pre = _pre_custom
-print("[wrapper] pré-tokenizador registrado: gpt2 (ByteLevel, estilo GPT-2)")
+print("[wrapper] pré-tokenizador registrado: gpt-2 (ByteLevel, estilo GPT-2)")
 
 if __name__ == "__main__":
     import runpy

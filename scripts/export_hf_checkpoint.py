@@ -58,12 +58,17 @@ def main():
     # tokenizer treinado do zero -> arquivos clássicos do GPT-2
     tok = Tokenizer.from_file(str(REPO_ROOT / "data" / "tokenizer_machado.json"))
     tok.save(str(out / "tokenizer.json"))
-    bpe = tok.model
+    # merges direto do tokenizer.json (API do tokenizers muda entre versões)
+    import json as _json
+    tj = _json.loads((REPO_ROOT / "data" / "tokenizer_machado.json").read_text(encoding="utf-8"))
+    vocab = tj["model"]["vocab"]
     (out / "vocab.json").write_text(
-        json.dumps(bpe.get_vocab(), ensure_ascii=False), encoding="utf-8"
+        json.dumps(vocab, ensure_ascii=False), encoding="utf-8"
     )
-    merges = "\n".join(" ".join(m) for m in bpe.get_merges())
-    (out / "merges.txt").write_text("#version: 0.2\n" + merges + "\n", encoding="utf-8")
+    merges = tj["model"]["merges"]
+    (out / "merges.txt").write_text(
+        "#version: 0.2\n" + "\n".join(" ".join(m) for m in merges) + "\n", encoding="utf-8"
+    )
     (out / "tokenizer_config.json").write_text(json.dumps({
         "tokenizer_class": "GPT2TokenizerFast",
         "bos_token": "<|endoftext|>",
