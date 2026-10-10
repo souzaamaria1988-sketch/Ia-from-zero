@@ -1,0 +1,49 @@
+name: Treinar IA do zero
+
+on:
+  workflow_dispatch:
+    inputs:
+      iters:
+        description: "Iterações de treino (mais = melhor = mais lento)"
+        default: "2000"
+        type: string
+
+jobs:
+  treinar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Clonar e compilar llama.cpp (conversor + quantizador + cli)
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp /tmp/llama.cpp
+          cmake -B /tmp/llama.cpp/build -S /tmp/llama.cpp -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build --target llama-cli llama-quantize -j$(nproc)
+
+      - name: Pipeline completo (dados -> treino -> GGUF)
+        env:
+          LLAMA_CPP_DIR: /tmp/llama.cpp
+          ITERS: ${{ inputs.iters }}
+        run: bash scripts/run_all.sh
+
+      - name: Gerar amostra
+        env:
+          LLAMA_CPP_DIR: /tmp/llama.cpp
+        run: |
+          bash scripts/test_gguf.sh models/gpt-machado-q8_0.gguf | tee sample_ci.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpt-machado-gguf
+          path: |
+            models/*.gguf
+            sample_ci.txt
