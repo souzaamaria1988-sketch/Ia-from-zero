@@ -80,8 +80,8 @@ def montar_corpus(csv_path: Path) -> Path:
     return out
 
 
-def treinar_tokenizer(corpus: Path) -> Path:
-    tok_path = DATA_DIR / "tokenizer_machado.json"
+def treinar_tokenizer(corpus: Path, vocab_size: int = VOCAB_SIZE, suffix: str = "") -> Path:
+    tok_path = DATA_DIR / f"tokenizer_machado{suffix}.json"
     if tok_path.exists():
         print(f"[tokenizer] já existe: {tok_path}")
         return tok_path
@@ -89,7 +89,7 @@ def treinar_tokenizer(corpus: Path) -> Path:
     tok.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)  # estilo GPT-2
     tok.decoder = decoders.ByteLevel()
     trainer = trainers.BpeTrainer(
-        vocab_size=VOCAB_SIZE,
+        vocab_size=vocab_size,
         special_tokens=["<|endoftext|>"],
         initial_alphabet=ByteLevel.alphabet(),
         min_frequency=2,
@@ -101,22 +101,31 @@ def treinar_tokenizer(corpus: Path) -> Path:
     return tok_path
 
 
-def tokenizar(tok_path: Path, val_frac: float = 0.01) -> None:
+def tokenizar(tok_path: Path, val_frac: float = 0.01, suffix: str = "") -> None:
     tok = Tokenizer.from_file(str(tok_path))
     corpus = (DATA_DIR / "corpus.txt").read_text(encoding="utf-8")
     ids = np.array(tok.encode(corpus).ids, dtype=np.uint16)
     n = len(ids)
     n_val = max(2000, int(n * val_frac))
-    ids[:-n_val].tofile(DATA_DIR / "train.bin")
-    ids[-n_val:].tofile(DATA_DIR / "val.bin")
+    ids[:-n_val].tofile(DATA_DIR / f"train{suffix}.bin")
+    ids[-n_val:].tofile(DATA_DIR / f"val{suffix}.bin")
     print(f"[tokenizar] {n:,} tokens | treino {n-n_val:,} | val {n_val:,}")
     print(f"[tokenizar] razão texto/token = {len(corpus)/n:.2f} chars/token")
 
 
 if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--vocab-size", type=int, default=VOCAB_SIZE)
+    ap.add_argument("--tag", type=str, default="",
+                    help="sufixo dos artefatos (ex.: v3 -> tokenizer_machado-v3.json)")
+    args = ap.parse_args()
+
+    suffix = f"-{args.tag}" if args.tag else ""
     DATA_DIR.mkdir(exist_ok=True)
     csv_path = baixar_csv(Path("/tmp/obras_machado_de_assis.csv"))
     corpus = montar_corpus(csv_path)
-    tok_path = treinar_tokenizer(corpus)
-    tokenizar(tok_path)
-    print("[OK] dados prontos em data/")
+    tok_path = treinar_tokenizer(corpus, args.vocab_size, suffix)
+    tokenizar(tok_path, suffix=suffix)
+    print(f"[OK] dados prontos em data/ (vocab={args.vocab_size}, tag='{args.tag}')")

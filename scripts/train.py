@@ -70,6 +70,8 @@ def main():
     ap.add_argument("--eval-interval", type=int, default=200)
     ap.add_argument("--eval-iters", type=int, default=20)
     ap.add_argument("--seed", type=int, default=1337)
+    ap.add_argument("--data-tag", type=str, default="",
+                    help="sufixo dos arquivos de dados (ex.: v3 -> train-v3.bin)")
     ap.add_argument("--init-from", type=Path, default=None,
                     help="checkpoint .pt para continuar o treino (pesos)")
     ap.add_argument("--timeout-min", type=float, default=0.0, help="0 = sem limite")
@@ -80,13 +82,14 @@ def main():
     rng = np.random.default_rng(args.seed)
     torch.set_num_threads(max(1, torch.get_num_threads()))
 
+    suffix = f"-{args.data_tag}" if args.data_tag else ""
     data = {
-        "train": np.memmap(DATA_DIR / "train.bin", dtype=np.uint16, mode="r"),
-        "val": np.memmap(DATA_DIR / "val.bin", dtype=np.uint16, mode="r"),
+        "train": np.memmap(DATA_DIR / f"train{suffix}.bin", dtype=np.uint16, mode="r"),
+        "val": np.memmap(DATA_DIR / f"val{suffix}.bin", dtype=np.uint16, mode="r"),
     }
     vocab_size = int(data["train"].max()) + 1
     from tokenizers import Tokenizer
-    tok = Tokenizer.from_file(str(DATA_DIR / "tokenizer_machado.json"))
+    tok = Tokenizer.from_file(str(DATA_DIR / f"tokenizer_machado{suffix}.json"))
     vocab_size = tok.get_vocab_size()
 
     cfg = GPTConfig(
