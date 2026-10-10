@@ -33,12 +33,22 @@
 | Arquitetura | Transformer decoder (GPT-2) pré-LayerNorm, escrito do zero |
 | Camadas / cabeças | 6 camadas, 4 cabeças (d=128), MLP 4×, contexto 256 |
 | Vocabulário | 512 tokens BPE (treinado do zero sobre Machado) |
-| Treino | 3,98 milhões de tokens de prosa brasileira (33 obras), 2 CPUs |
+| Treino | 3,98 milhões de tokens de prosa brasileira (33 obras), 2 fases, val **2,79** |
 | **Tamanho Q8_0** | **≈ 1,4 MB** — roda em qualquer celular |
 | Tamanho Q4_K_M | ≈ 0,9 MB |
 
 Compare: os GGUF de 7B/13B/70B que você baixa do HuggingFace têm 4/8/40 **gigabytes**.
 Este modelo é **milhares de vezes menor** — e foi treinado **aqui, do zero, em 2 CPUs**.
+
+### Resultados reais do treino
+
+- val loss: **6,26 → 3,15 → 2,79** em duas fases (4.800 iterações, ~82 min em 2 CPUs,
+  com reinício de taxa de aprendizado) — curva completa e comparação v1×v2 em
+  [`samples/amostra.md`](samples/amostra.md).
+- O modelo escreve português com voz de romance do século XIX: diálogos com
+  travessão, sintaxe plausível e vocabulário majoritariamente correto
+  (com invenções divertidas — inevitáveis neste tamanho).
+- No llama.cpp em 2 núcleos: **~1.000–2.100 tokens/s** de geração.
 
 ## Os arquivos GGUF (já treinados, prontos para o celular)
 
@@ -96,7 +106,7 @@ python3 scripts/demo_interativo.py
 ## Baixar o modelo para o celular 📱
 
 Após o merge do PR, o GGUF fica disponível direto no repositório
-(48 KB de download por rede móvel não existe mais lento que segure isso):
+(1,58 MB — baixa até por rede 3G em segundos):
 
 ```
 https://github.com/souzaamaria1988-sketch/Ia-from-zero/raw/main/models/gpt-machado-q8_0.gguf
@@ -115,15 +125,16 @@ cmake --build llama.cpp/build --target llama-cli -j
 ./llama.cpp/build/bin/llama-cli -m gpt-machado-q8_0.gguf -p "— Capitu," -n 200
 ```
 
-**Android/iOS (app próprio):** embuta o modelo com
-[`llama.cpp` no Android Studio/NDK](https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md)
-ou no iOS via [llama-cpp-swift](https://github.com/scala/llama-cpp-swift) —
-0,6 MB de modelo + ~2 MB de runtime cabem em qualquer app, sem internet.
+**Android/iOS (app próprio):** este repositório já traz um **app Android completo**
+em [`android/`](android/) (Kotlin + JNI + llama.cpp) que embute o GGUF no APK e
+roda 100% offline — abra a pasta no Android Studio e aperte Run. O APK final
+fica em torno de 6 MB. Para iOS, use
+[llama-cpp-swift](https://github.com/scala/llama-cpp-swift) com o mesmo GGUF.
 
 ## Honestidade técnica
 
 - Este modelo **não é um ChatGPT** — é um gerador de prosa estilo Machado de
-  Assis, do tamanho de um GIF. Com 570K parâmetros e 2 CPUs de treino, ele
+  Assis, do tamanho de uma foto. Com 1,35M de parâmetros e 2 CPUs de treino, ele
   aprende ortografia, ritmo e vocabulário, mas "inteligência" de assistente
   exige bilhões de parâmetros e trilhões de tokens.
 - A matemática do desafio original: treinar **10¹² parâmetros** a ~6 FLOPs/parâmetro/token
